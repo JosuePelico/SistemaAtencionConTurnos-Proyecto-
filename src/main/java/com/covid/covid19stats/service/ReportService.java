@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import java.time.LocalDate;
+import java.util.TreeMap;
 import java.util.List;
+import java.time.LocalDate;
+
 import java.util.concurrent.ThreadLocalRandom;
 /**
  *
@@ -136,6 +138,7 @@ public void showGraph() {
         logger.info(" (" + report.getConfirmed() + ")");
     }
 }
+
 public void exportReport() {
     List<Report> reports = reportRepository.findAll();
     String fileName = "report-" + LocalDate.now() + ".txt";
@@ -155,5 +158,27 @@ public void exportReport() {
     }
 }
 
+/**
+ * Get reports by date and country ISO, grouped by province name
+ * @param date date of reports
+ * @param countryIso country ISO code
+ * @return TreeMap of reports grouped by province name
+ */
+public TreeMap<String, Report> getReportsByDateAndCountry(LocalDate date, String countryIso) {
+    List<Report> reports = reportRepository.findByDateAndCountryIso(date, countryIso);
 
+    TreeMap<String, Report> reportMap = new TreeMap<>();
+
+    for (Report report : reports) {
+        reportMap.put(report.getProvince(), report);
+    }
+
+    // Print results to console
+    System.out.println("Reports for Country: " + countryIso + " on Date: " + date);
+    for (String province : reportMap.keySet()) {
+        System.out.println("Province: " + province + " - Report: " + reportMap.get(province));
+    }
+
+    return reportMap;
+}
 }

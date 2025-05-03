@@ -25,6 +25,7 @@ public class Report {
     private String iso;
     private String province;
     private LocalDate date;
+    private String countryIso;  // 
     private int confirmed;
     private int deaths;
     private int recovered;

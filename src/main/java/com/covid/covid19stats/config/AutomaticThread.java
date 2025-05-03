@@ -1,27 +1,29 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.covid.covid19stats.config;
 
+import com.covid.covid19stats.model.ExecutedReport;
+import com.covid.covid19stats.model.ExecutedReportId;
+import com.covid.covid19stats.repository.ExecutedReportRepository;
+import com.covid.covid19stats.service.ProvinceService;
+import com.covid.covid19stats.service.RegionService;
+import com.covid.covid19stats.service.ReportService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.covid.covid19stats.service.RegionService;
-import com.covid.covid19stats.service.ProvinceService;
-import com.covid.covid19stats.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
+
+import java.time.LocalDate;
+
 /**
- *
- * @author rodol
+ * Automatic thread to fetch and store COVID-19 data, with execution control
  */
 @Component
 public class AutomaticThread {
 
     private static final Logger logger = LogManager.getLogger(AutomaticThread.class);
-    
+
     @Autowired
     private RegionService regionService;
 
@@ -31,17 +33,40 @@ public class AutomaticThread {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private ExecutedReportRepository executedReportRepository;
+
     @Value("${covid19stats.default-iso}")
-    private String defaultIso; 
+    private String defaultIso;
+
+    @Value("${covid.report.date}")
+    private String reportDate; // Format yyyy-MM-dd
 
     @Scheduled(initialDelay = 15000, fixedDelay = Long.MAX_VALUE)
     public void autoRunCovidDataLoad() {
-        logger.info("Executing Thread");
+        logger.info("Starting Automatic Thread for COVID-19 data load...");
 
-        regionService.fetchAndSaveRegions();
-        provinceService.fetchAndSaveProvinces(defaultIso);
-        reportService.fetchAndSaveReports(defaultIso);
+        try {
+            LocalDate date = LocalDate.parse(reportDate);
 
-        logger.info("Data Saved Successfully");
+            ExecutedReportId executedReportId = new ExecutedReportId(date, defaultIso);
+
+            if (executedReportRepository.existsById(executedReportId)) {
+                logger.info("Execution skipped: Country {} already processed for date {}", defaultIso, reportDate);
+                return;
+            }
+
+            regionService.fetchAndSaveRegions();
+            provinceService.fetchAndSaveProvinces(defaultIso);
+            reportService.fetchAndSaveReports(defaultIso);
+
+            ExecutedReport executedReport = new ExecutedReport(date, defaultIso);
+            executedReportRepository.save(executedReport);
+
+            logger.info("Execution completed and recorded for Country: {} on Date: {}", defaultIso, reportDate);
+
+        } catch (Exception e) {
+            logger.error("Error during Automatic Thread execution: ", e);
+        }
     }
-   }
+}

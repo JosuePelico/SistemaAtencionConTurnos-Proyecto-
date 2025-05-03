@@ -1,43 +1,55 @@
-# Covid19Stats 🌍📊
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
+# 📄 README de Cambios - Proyecto Covid19Stats
 
-Aplicación Spring Boot para el monitoreo y análisis de estadísticas globales de COVID-19, con integración a base de datos MySQL.
+## ✅ Descripción General
+Este proyecto consume una API pública de estadísticas de COVID-19 para Estados Unidos (USA) y almacena los datos en base de datos.  
+Se realizaron mejoras aplicando principios SOLID y convenciones de codificación recomendadas.
 
-## 📌 Características principales
+---
 
-- ✅ API REST para consulta de estadísticas
-- ✅ Integración con base de datos MySQL
-- ✅ Modelo de datos para casos, muertes y recuperaciones
-- ✅ Scheduling para actualización automática de datos
-- ✅ Documentación Swagger/OpenAPI incluida
+## 🚀 Mejoras Implementadas
 
-## 🚀 Tecnologías utilizadas
+### 1. Control de Ejecución de Hilo Automático
+- Se agregó un control previo para evitar ejecuciones repetidas del hilo (`AutomaticThread`) por país y fecha.
+- Se creó una nueva entidad `ExecutedReport` y su repositorio correspondiente `ExecutedReportRepository`.
+- Antes de ejecutar la recolección de datos, el hilo consulta la tabla `executed_reports`:
+  - **Si ya existe** el registro → Omite la ejecución y registra en logs.
+  - **Si no existe** → Ejecuta normalmente y guarda un nuevo registro.
+- Se parametrizó la fecha de ejecución (`covid.report.date`) en el archivo `application.properties`.
 
-- **Backend**: 
-  ![Java](https://img.shields.io/badge/-Java%2017-007396?logo=java&logoColor=white)
-  ![Spring Boot](https://img.shields.io/badge/-Spring%20Boot%203.3.10-6DB33F?logo=spring&logoColor=white)
-  ![Spring Data JPA](https://img.shields.io/badge/-Spring%20Data%20JPA-6DB33F?logo=spring&logoColor=white)
+---
 
-- **Base de datos**: 
-  ![MySQL](https://img.shields.io/badge/-MySQL%208.0-4479A1?logo=mysql&logoColor=white)
+### 2. Consulta de Datos por Fecha e ISO
+- Se implementó el método `getReportsByDateAndCountry` en el servicio `ReportService`.
+- Este método:
+  - Recibe una **fecha** y un **código ISO de país**.
+  - Consulta los reportes almacenados.
+  - Agrupa los resultados en un `TreeMap<String, Report>`, eliminando duplicados automáticamente.
+  - Ordena los datos por nombre de provincia y muestra la información en consola.
 
-- **Herramientas**: 
-  ![Maven](https://img.shields.io/badge/-Maven-C71A36?logo=apache-maven&logoColor=white)
-  ![Lombok](https://img.shields.io/badge/-Lombok-pink)
+---
 
-## 📦 Requisitos previos
+## 🛠️ Tecnologías Utilizadas
+- Java 17
+- Spring Boot
+- Maven
+- JPA / Hibernate
+- MariaDB / MySQL
 
-- Java 17 JDK
-- MySQL 8.0+
-- Maven 3.8+
-- Git (opcional)
+---
 
-## 🛠️ Configuración
+## 🧠 Principios Aplicados
+- **Single Responsibility Principle (SRP)**: Separación clara de responsabilidades en servicios, entidades y repositorios.
+- **Open-Closed Principle (OCP)**: Se agregó funcionalidad sin modificar la estructura existente.
 
-1. Clona el repositorio:
-```bash
-git clone https://github.com/DanielChitay/Covid19Stats.git
-cd Covid19Stats
+---
+
+## 📋 Consideraciones Adicionales
+- La tabla `executed_reports` debe ser creada previamente en la base de datos.
+- No se permiten duplicados en la combinación de `execution_date` y `country_iso`.
+
+---
+
+## 👨‍💻 Autor
+Proyecto adaptado por: **[Tu Nombre Aquí]**  
+Fecha: **Abril 2025**
