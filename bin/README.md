@@ -1,43 +1,93 @@
-# Covid19Stats 🌍📊
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
+# Sistema de Atención con Turnos
 
-Aplicación Spring Boot para el monitoreo y análisis de estadísticas globales de COVID-19, con integración a base de datos MySQL.
+Este proyecto es una API REST desarrollada con **Java Spring Boot** para gestionar un sistema de atención por turnos. Permite a los usuarios autenticarse, reservar espacios de atención, y a los administradores gestionar áreas, reservas y estados.
 
-## 📌 Características principales
+## 🚀 Características Principales
 
-- ✅ API REST para consulta de estadísticas
-- ✅ Integración con base de datos MySQL
-- ✅ Modelo de datos para casos, muertes y recuperaciones
-- ✅ Scheduling para actualización automática de datos
-- ✅ Documentación Swagger/OpenAPI incluida
+- Autenticación de usuarios con JWT
+- Roles: CLIENTE y ADMINISTRADOR
+- CRUD de áreas de atención
+- Creación, consulta y cancelación de reservas
+- Registro de logs de acciones en MongoDB
+- Documentación de API con Swagger
+- Pruebas con Postman
 
-## 🚀 Tecnologías utilizadas
+## 🧰 Tecnologías Utilizadas
 
-- **Backend**: 
-  ![Java](https://img.shields.io/badge/-Java%2017-007396?logo=java&logoColor=white)
-  ![Spring Boot](https://img.shields.io/badge/-Spring%20Boot%203.3.10-6DB33F?logo=spring&logoColor=white)
-  ![Spring Data JPA](https://img.shields.io/badge/-Spring%20Data%20JPA-6DB33F?logo=spring&logoColor=white)
+- Java 17
+- Spring Boot 3
+- Spring Security + JWT
+- PostgreSQL (para usuarios, reservas y áreas)
+- MongoDB (para logs de auditoría)
+- Maven (gestión de dependencias)
+- Swagger (documentación)
+- Postman (pruebas API)
 
-- **Base de datos**: 
-  ![MySQL](https://img.shields.io/badge/-MySQL%208.0-4479A1?logo=mysql&logoColor=white)
+## ⚙️ Configuración Inicial
 
-- **Herramientas**: 
-  ![Maven](https://img.shields.io/badge/-Maven-C71A36?logo=apache-maven&logoColor=white)
-  ![Lombok](https://img.shields.io/badge/-Lombok-pink)
+1. **Base de Datos PostgreSQL:**
+   - Crear la base de datos `reservasdb`
+   - Usuario: `postgres`, Contraseña: `postgres` (modificable en `application.properties`)
 
-## 📦 Requisitos previos
+2. **Base de Datos MongoDB:**
+   - Crear la base de datos `logsdb` (se crea automáticamente si no existe)
 
-- Java 17 JDK
-- MySQL 8.0+
-- Maven 3.8+
-- Git (opcional)
+3. **Archivo `application.properties`:**
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/reservasdb
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.jpa.hibernate.ddl-auto=update
 
-## 🛠️ Configuración
+spring.data.mongodb.uri=mongodb://localhost:27017/logsdb
+```
 
-1. Clona el repositorio:
+## ▶️ Ejecución del Proyecto
+
 ```bash
-git clone https://github.com/DanielChitay/Covid19Stats.git
-cd Covid19Stats
+mvn clean install
+mvn spring-boot:run
+```
+
+Accede a la documentación Swagger en:
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+## 📬 Endpoints Clave
+
+| Método | Endpoint         | Descripción                         |
+|--------|------------------|-------------------------------------|
+| POST   | /login           | Autenticación de usuarios           |
+| POST   | /register        | Registro de nuevos usuarios         |
+| GET    | /areas           | Listar áreas disponibles            |
+| POST   | /reservas        | Crear una reserva                  |
+| GET    | /reservas        | Listar reservas del usuario         |
+| PUT    | /reservas/{id}   | Cambiar estado de reserva           |
+| DELETE | /reservas/{id}   | Cancelar reserva                    |
+
+## 🔐 Seguridad
+
+El acceso a todos los endpoints (excepto `/login` y `/register`) requiere un token JWT válido en la cabecera:
+
+```
+Authorization: Bearer <token>
+```
+
+## 🧪 Pruebas con Postman
+
+Importar:
+- `SistemaTurnos_PostmanCollection_Admin.json`
+- `SistemaTurnos_PostmanEnvironment.json`
+
+## 📁 Estructura del Proyecto
+
+- `controller/`: Controladores REST
+- `model/`: Entidades JPA y modelos Mongo
+- `repository/`: Repositorios PostgreSQL y MongoDB
+- `service/`: Lógica de negocio
+- `security/`: Seguridad con JWT
+- `config/`: Configuración de Swagger
+
+
